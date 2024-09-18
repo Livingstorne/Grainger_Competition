@@ -2,29 +2,59 @@
 #define RELAY_SET_PIN 18   // Pin to turn the relay on (Set)
 #define RELAY_RESET_PIN 5 // Pin to turn the relay off (Reset)
 
+// Define pin for ALS-PT19 light sensor (analog input)
+#define LIGHTSENSOR_PIN A0
+
+// Define threshold for light sensor to control LED
+#define LIGHT_THRESHOLD 25 
+
 void setup() {
+
+
   // Initialize both relay control pins as outputs
   pinMode(RELAY_SET_PIN, OUTPUT);
   pinMode(RELAY_RESET_PIN, OUTPUT);
 
+  // Initialize ALS-PT19 sensor pin as input
+  pinMode(LIGHTSENSOR_PIN, INPUT);
+
   // Set both pins to LOW initially (relay off)
   digitalWrite(RELAY_SET_PIN, LOW);
-  delay(100);
-  digitalWrite(RELAY_RESET_PIN, HIGH);
+  digitalWrite(RELAY_RESET_PIN, LOW);
+
+  // Initialize Serial Monitor for debugging
+  Serial.begin(9600);
 
 }
 
 void loop() {
-  // Turn the LED on by setting the relay (using the SET pin)
-  digitalWrite(RELAY_SET_PIN, HIGH);
-  delay(100);  // Short pulse to activate relay
-  digitalWrite(RELAY_SET_PIN, LOW); // Turn off the set pin after setting the relay
-  delay(1000); // LED remains on for 1 second
 
-  // Turn the LED off by resetting the relay (using the RESET pin)
-  digitalWrite(RELAY_RESET_PIN, HIGH);
-  delay(100);  // Short pulse to reset the relay
-  digitalWrite(RELAY_RESET_PIN, LOW); // Turn off the reset pin after resetting the relay
-  delay(1000); // LED remains off for 1 second
+  
+  // Read the value from the ALS-PT19 light sensor
+  int lightLevel = analogRead(LIGHTSENSOR_PIN);
+
+  // Display the light sensor reading on the Serial Monitor
+  Serial.print("Light Sensor Reading: ");
+  Serial.println(lightLevel);
+
+  // Compare the light level to the threshold
+  if (lightLevel < LIGHT_THRESHOLD) {
+
+    // If the light level is below the threshold (dark), turn the relay on (LED on)
+    digitalWrite(RELAY_SET_PIN, HIGH); // Set the relay to ON
+    delay(100);  // Short pulse to activate relay
+    digitalWrite(RELAY_SET_PIN, LOW); // Turn off the set pin
+
+  } else {
+
+    // If the light level is above the threshold (bright), turn the relay off (LED off)
+    digitalWrite(RELAY_RESET_PIN, HIGH); // Reset the relay to OFF
+    delay(100);  // Short pulse to reset the relay
+    digitalWrite(RELAY_RESET_PIN, LOW); // Turn off the reset pin
+  
+  }
+
+  // Small delay to avoid bouncing or frequent toggling
+  delay(500);
 
 }
