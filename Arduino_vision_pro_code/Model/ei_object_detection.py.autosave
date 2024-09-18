@@ -59,7 +59,7 @@ last_communication_time = time.ticks_ms()  # Get the current time in millisecond
 def send_fruit_state_to_feather(state):
     """ Send the detected fruit state to Feather M0 via I2C """
     try:
-        i2c.send(state, feather_addr)
+        i2c.send(bytes([state]), feather_addr)
         print(f"Sent state {state} to Feather")
     except OSError as e:
         print(f"Error sending data: {e}")
@@ -107,12 +107,16 @@ while(True):
                 fruit_state = EMPTY
 
     # Check if 5 seconds (5000 ms) have passed since the last communication
-    if time.ticks_diff(time.ticks_ms(), last_communication_time) >= 5000:
-        # Send the detected fruit state to Feather M0 via I2C every 5 seconds
+    time_diff = time.ticks_diff(time.ticks_ms(), last_communication_time)
+    print(f"Time since last communication: {time_diff} ms")
+    print(f"{fruit_state} sent to feather!")
+    
+    if time_diff >= 5000:
         send_fruit_state_to_feather(fruit_state)
-
-        # Update the last communication time
+        print(f"{fruit_state} sent to feather!")
         last_communication_time = time.ticks_ms()
+    
+        
 
 
     print(clock.fps(), "fps", end="\n\n")
